@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +33,7 @@ public class CourseService {
             course.setCategoryId(dto.getCategoryId());
             course.setInstructorId(dto.getInstructorId());
             course.setStatus(Course.Status.valueOf(dto.getStatus()));
-            course.setPrice(dto.getPrice());
+            course.setPrice(BigDecimal.valueOf(dto.getPrice()));
 
             // ✅ Xử lý ảnh
             if (imageFile != null && !imageFile.isEmpty()) {
@@ -56,8 +58,25 @@ public class CourseService {
     public boolean isInstructorOfCourse(int instructorId, int courseId) {
         return courseMapper.countByInstructorAndCourse(instructorId, courseId) > 0;
     }
-    public boolean updateCourse(Course course) {
-        return courseMapper.updateCourse(course) > 0;
+    public boolean updateCourse(Course course, MultipartFile imageFile) {
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                // 👉 Lưu ảnh vào thư mục, ví dụ "uploads/"
+                String originalFilename = imageFile.getOriginalFilename();
+                String filename = UUID.randomUUID() + "_" + originalFilename;
+                Path filePath = Paths.get("uploads", filename);
+                Files.createDirectories(filePath.getParent());
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // 👉 Gán tên ảnh vào khóa học
+                course.setThumbnailUrl(filename);
+            }
+
+            return courseMapper.updateCourse(course) > 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean deleteCourse(Integer courseId) {

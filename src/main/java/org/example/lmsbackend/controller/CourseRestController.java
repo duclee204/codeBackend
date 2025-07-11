@@ -71,16 +71,21 @@ public class CourseRestController {
     }
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<?> updateCourse(@PathVariable("id") Integer courseId, @RequestBody Course course) {
+    public ResponseEntity<?> updateCourse(
+            @PathVariable("id") Integer courseId,
+            @RequestPart("course") Course course,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+
         course.setCourseId(courseId);
-        boolean updated = courseService.updateCourse(course);
+
+        boolean updated = courseService.updateCourse(course, imageFile);
+
         if (updated) {
             return ResponseEntity.ok("Course updated successfully");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
     }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Integer courseId) {
@@ -91,5 +96,4 @@ public class CourseRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
         }
     }
-
 }
