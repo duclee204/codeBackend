@@ -1,0 +1,343 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Courses Dashboard
+  </title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   @import url('https://cdn.tailwindcss.com');
+
+   body {
+     font-family: 'Inter', sans-serif;
+     background-color: #e3e8ff;
+     min-height: 100vh;
+     display: flex;
+   }
+   aside {
+     background-color: white;
+     width: 16rem;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-between;
+     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+     border-top-right-radius: 0.75rem;
+     border-bottom-right-radius: 0.75rem;
+   }
+   .sidebar-top {
+     padding: 2rem 1.5rem;
+   }
+   .logo {
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+     margin-bottom: 1rem;
+   }
+   .logo img {
+     width: 2.5rem;
+     height: 2.5rem;
+   }
+   .logo-text {
+     color: #4a90e2;
+     font-weight: 600;
+     font-size: 1.125rem;
+     user-select: none;
+   }
+   nav {
+     display: flex;
+     flex-direction: column;
+     gap: 1rem;
+     padding: 0 1.5rem;
+   }
+   nav a {
+     display: flex;
+     align-items: center;
+     gap: 0.75rem;
+     color: #2a3a5b;
+     font-weight: 600;
+     font-size: 0.875rem;
+     text-decoration: none;
+   }
+   nav a i {
+     font-size: 1.125rem;
+   }
+   nav a.active {
+     background-color: #cce6ff;
+     border-radius: 0.375rem;
+     padding: 0.5rem 0.75rem;
+   }
+   .sidebar-bottom {
+     padding: 1.5rem 1.5rem;
+     border-top: 1px solid #e5e7eb;
+   }
+   .logout-btn {
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+     color: #2a3a5b;
+     font-weight: 600;
+     font-size: 0.875rem;
+     background: none;
+     border: none;
+     cursor: pointer;
+     width: 100%;
+   }
+   .logout-btn i {
+     font-size: 1.125rem;
+   }
+
+   main {
+     flex: 1;
+     padding: 1.5rem;
+   }
+   h1 {
+     font-weight: 600;
+     font-size: 1.125rem;
+     color: #2a3a5b;
+     margin-bottom: 1rem;
+     user-select: none;
+   }
+   .search-input {
+     width: 100%;
+     max-width: 20rem;
+     border-radius: 0.375rem;
+     background-color: #f9f9fb;
+     font-size: 0.75rem;
+     color: #a0a0a0;
+     padding: 0.5rem 0.75rem;
+     border: none;
+     outline: none;
+   }
+   .search-input::placeholder {
+     color: #a0a0a0;
+   }
+   .courses-container {
+     background-color: #cce6ff;
+     border-radius: 0.375rem;
+     padding: 1rem;
+     display: flex;
+     flex-direction: column;
+     gap: 1rem;
+   }
+   .create-btn-wrapper {
+     display: flex;
+     justify-content: flex-end;
+   }
+   .create-btn {
+     background-color: #4a90e2;
+     color: white;
+     font-weight: 600;
+     font-size: 0.75rem;
+     padding: 0.25rem 1rem;
+     border-radius: 0.375rem;
+     border: none;
+     cursor: pointer;
+   }
+   .cards-grid {
+     display: grid;
+     grid-template-columns: repeat(1, minmax(0, 1fr));
+     gap: 1rem;
+   }
+   @media (min-width: 640px) {
+     .cards-grid {
+       grid-template-columns: repeat(2, minmax(0, 1fr));
+     }
+   }
+   @media (min-width: 768px) {
+     .cards-grid {
+       grid-template-columns: repeat(3, minmax(0, 1fr));
+     }
+   }
+   .card {
+     background-color: white;
+     border-radius: 0.5rem;
+     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+     overflow: hidden;
+     display: flex;
+     flex-direction: column;
+   }
+   .card img.card-image {
+     width: 100%;
+     height: 9rem;
+     object-fit: cover;
+     border-top-left-radius: 0.5rem;
+     border-top-right-radius: 0.5rem;
+   }
+   .card-content {
+     padding: 0.75rem;
+     flex-grow: 1;
+     display: flex;
+     flex-direction: column;
+   }
+   .card-title {
+     font-weight: 600;
+     font-size: 0.75rem;
+     color: #2a3a5b;
+     margin-bottom: 0.5rem;
+     user-select: none;
+   }
+   .instructor-wrapper {
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+   }
+   .instructor-img {
+     width: 1.5rem;
+     height: 1.5rem;
+     border-radius: 9999px;
+   }
+   .details-btn {
+     margin-top: auto;
+     background-color: #2a52e2;
+     color: white;
+     font-weight: 600;
+     font-size: 0.75rem;
+     border-radius: 0.375rem;
+     padding: 0.25rem 0.5rem;
+     border: none;
+     cursor: pointer;
+     width: 100%;
+   }
+
+   .user-profile {
+     position: fixed;
+     top: 1.5rem;
+     right: 1.5rem;
+     background-color: white;
+     border-radius: 9999px;
+     padding: 0.25rem 1rem;
+     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+     display: flex;
+     align-items: center;
+     gap: 0.75rem;
+     user-select: none;
+   }
+   .user-profile img {
+     width: 2rem;
+     height: 2rem;
+     border-radius: 9999px;
+   }
+   .user-text {
+     text-align: right;
+   }
+   .user-name {
+     font-weight: 600;
+     font-size: 0.75rem;
+     color: #2a3a5b;
+     margin: 0;
+   }
+   .user-role {
+     font-size: 0.5625rem;
+     color: #a0a0a0;
+     margin: 0;
+   }
+   .user-chevron {
+     color: #a0a0a0;
+     font-size: 0.75rem;
+   }
+  </style>
+ </head>
+ <body>
+  <aside>
+   <div class="sidebar-top">
+    <div class="logo">
+     <img alt="Blue logo with abstract shape" height="40" src="https://storage.googleapis.com/a1aa/image/89ed49fe-e4a0-439f-4204-e97278685baf.jpg" width="40"/>
+     <span class="logo-text">CMC Learn</span>
+    </div>
+    <nav>
+     <a href="#"><i class="fas fa-th-large"></i>Dashboard</a>
+     <a href="#"><i class="fas fa-users"></i>Users</a>
+     <a class="active" href="#"><i class="fas fa-columns"></i>Courses</a>
+     <a href="#"><i class="fas fa-file-alt"></i>Report</a>
+     <a href="#"><i class="fas fa-envelope"></i>Messages</a>
+     <a href="#"><i class="fas fa-question-circle"></i>Help</a>
+     <a href="#"><i class="fas fa-cog"></i>Setting</a>
+    </nav>
+   </div>
+   <div class="sidebar-bottom">
+    <button class="logout-btn"><i class="fas fa-sign-out-alt"></i>Log out</button>
+   </div>
+  </aside>
+  <main>
+   <h1>Courses</h1>
+   <div>
+    <input class="search-input" placeholder="Search" type="search"/>
+   </div>
+   <div class="courses-container">
+    <div class="create-btn-wrapper">
+     <button class="create-btn">Create</button>
+    </div>
+    <div class="cards-grid">
+     <div class="card">
+      <img alt="Math chalkboard with formulas and equations" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/e1a2bc1a-4b10-4759-38f6-c6858eccc04d.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">Maths Department</p>
+       <div class="instructor-wrapper">
+        <img alt="Female instructor portrait with brown hair and glasses" class="instructor-img" height="24" src="https://storage.googleapis.com/a1aa/image/aa52c126-d5d3-4847-2139-2879e0a1cb30.jpg" width="24"/>
+       </div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+     <div class="card">
+      <img alt="Chemistry lab glassware with colored liquids and beakers" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/ba58648d-4c43-46b2-07e3-d3fe81fcdb46.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">Chemistry Department</p>
+       <div class="instructor-wrapper">
+        <img alt="Female instructor portrait with brown hair and glasses" class="instructor-img" height="24" src="https://storage.googleapis.com/a1aa/image/aa52c126-d5d3-4847-2139-2879e0a1cb30.jpg" width="24"/>
+       </div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+     <div class="card">
+      <img alt="Physics atom model with glowing energy and particles" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/d84f40ab-7d61-43e0-f0ec-cd26dc848075.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">Physics Department</p>
+       <div class="instructor-wrapper">
+        <img alt="Female instructor portrait with brown hair and glasses" class="instructor-img" height="24" src="https://storage.googleapis.com/a1aa/image/aa52c126-d5d3-4847-2139-2879e0a1cb30.jpg" width="24"/>
+       </div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+     <div class="card">
+      <img alt="Computer screen showing code editor with programming code" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/e4a461ed-0bad-41fb-56de-c8f55d2115c3.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">Computer science Department</p>
+       <div class="instructor-wrapper">
+        <img alt="Male instructor portrait with short hair and glasses" class="instructor-img" height="24" src="https://storage.googleapis.com/a1aa/image/47e5cb34-3809-4b21-6cc1-f9bf760e31e3.jpg" width="24"/>
+       </div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+     <div class="card">
+      <img alt="Colorful alphabet blocks on wooden surface" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/76bfc11c-d0fa-4779-cac9-6b44c9581b53.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">English Department</p>
+       <div class="instructor-wrapper">
+        <img alt="Female instructor portrait with brown hair and glasses" class="instructor-img" height="24" src="https://storage.googleapis.com/a1aa/image/aa52c126-d5d3-4847-2139-2879e0a1cb30.jpg" width="24"/>
+       </div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+     <div class="card">
+      <img alt="Blank light background with subtle texture" class="card-image" height="140" src="https://storage.googleapis.com/a1aa/image/37dc0328-254a-4982-8fe5-9fe413355bcf.jpg" width="300"/>
+      <div class="card-content">
+       <p class="card-title">Social science Department</p>
+       <div class="instructor-wrapper" style="height: 1.5rem;"></div>
+       <button class="details-btn">Xem chi tiết</button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </main>
+  <div class="user-profile">
+   <img alt="Female user profile portrait with brown hair and glasses" height="32" src="https://storage.googleapis.com/a1aa/image/eb79ed3b-5aef-44ac-ad12-9ff392170d3d.jpg" width="32"/>
+   <div class="user-text">
+    <p class="user-name">Emila Harry</p>
+    <p class="user-role">Instructor</p>
+   </div>
+   <i class="fas fa-chevron-down user-chevron"></i>
+  </div>
+ </body>
+</html>
