@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/enrollments/**").hasAnyRole("admin", "instructor", "student")
                         .requestMatchers("/api/contents").hasAnyRole("admin", "instructor")
                         .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/api/users/delete/**").hasRole("admin")
+                        .requestMatchers("/uploads/avatars/**").permitAll() // ✅ Cho phép ảnh avatar
                         .requestMatchers("/cvs/**").permitAll() // ✅ Cho phép truy cập file CV công khai
                         .anyRequest().authenticated()
                 )

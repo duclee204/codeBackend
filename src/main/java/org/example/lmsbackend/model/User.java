@@ -13,6 +13,9 @@ public class User {
     private Integer userId;
     @Column(name = "cv_url", length = 255)
     private String cvUrl;
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl;
+
 
 
 
@@ -139,5 +142,12 @@ public class User {
 
     public void setCvUrl(String cvUrl) {
         this.cvUrl = cvUrl;
+    }
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }
