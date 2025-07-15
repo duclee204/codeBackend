@@ -1,5 +1,7 @@
 package org.example.lmsbackend.service;
 
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.example.lmsbackend.dto.UserDTO;
 import org.example.lmsbackend.email.EmailService;
 import org.example.lmsbackend.model.User;
@@ -8,8 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -41,8 +48,8 @@ public class UserService {
         return passwordEncoder.matches(userDTO.getPassword(), user.getPassword());
     }
 
-    // ✅ Đăng ký
-    public boolean register(UserDTO userDTO) {
+    // ✅ Đăng ký (có avatar)
+    public boolean register(UserDTO userDTO, MultipartFile avatarFile) {
         if (userMapper.existsByUsername(userDTO.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -62,11 +69,11 @@ public class UserService {
             user.setRole(role);
 
             if (role == User.Role.instructor) {
-                if (userDTO.getCvUrl() == null || userDTO.getCvUrl().isBlank()) {
+                if (!StringUtils.hasText(userDTO.getCvUrl())) {
                     throw new RuntimeException("CV is required for instructor registration.");
                 }
                 user.setCvUrl(userDTO.getCvUrl());
-                user.setVerified(false); // Instructor cần duyệt
+                user.setVerified(false);
             } else {
                 user.setVerified(userDTO.getIsVerified() != null ? userDTO.getIsVerified() : true);
             }
@@ -75,20 +82,24 @@ public class UserService {
             throw new RuntimeException("Invalid role: " + userDTO.getRole());
         }
 
+        // ✅ Lưu avatar nếu có
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            user.setAvatarUrl(saveAvatar(avatarFile));
+        } else {
+            user.setAvatarUrl("/uploads/avatars/default.png");
+        }
+
         try {
             return userMapper.insertUser(user) > 0;
         } catch (DuplicateKeyException e) {
             throw new RuntimeException("Username or Email already exists (DB constraint)");
         }
     }
-
-    // ✅ Lấy danh sách người dùng theo điều kiện
-    public List<User> getUsers(Integer userId, String role, Boolean isVerified, String username) {
-        return userMapper.findUsersByConditions(userId, role, isVerified, username);
+    public User getUserById(Long id) {
+        return userMapper.findById(id);
     }
-
     // ✅ Cập nhật người dùng
-    public boolean updateUser(Long id, UserDTO userDTO) {
+    public boolean updateUser(Long id, UserDTO userDTO, MultipartFile avatarFile) {
         User existingUser = userMapper.findById(id);
         if (existingUser == null) return false;
 
@@ -107,11 +118,47 @@ public class UserService {
             existingUser.setVerified(userDTO.getIsVerified());
         }
 
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        // ✅ Chỉ cập nhật mật khẩu nếu có nhập
+        if (StringUtils.hasText(userDTO.getPassword())) {
+            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword().trim()));
+        }
+
+        // ✅ Cập nhật avatar nếu có
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            existingUser.setAvatarUrl(saveAvatar(avatarFile));
+        }
+
+        // ✅ Cập nhật CV nếu có
+        if (StringUtils.hasText(userDTO.getCvUrl())) {
+            existingUser.setCvUrl(userDTO.getCvUrl());
         }
 
         return userMapper.updateUser(existingUser) > 0;
+    }
+
+    // ✅ Lưu file avatar
+    private String saveAvatar(MultipartFile file) {
+        try {
+            String uploadDir = "uploads/avatars";
+            Path uploadPath = Paths.get(uploadDir);
+            Files.createDirectories(uploadPath);
+
+            String originalFilename = file.getOriginalFilename();
+            String cleanedFilename = originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "avatar.png";
+            String filename = UUID.randomUUID() + "_" + cleanedFilename;
+
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return "/uploads/avatars/" + filename;
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi lưu file avatar", e);
+        }
+    }
+
+    // ✅ Lấy danh sách người dùng theo điều kiện
+    public List<User> getUsers(Integer userId, String role, Boolean isVerified, String username) {
+        return userMapper.findUsersByConditions(userId, role, isVerified, username);
     }
 
     // ✅ Xóa người dùng

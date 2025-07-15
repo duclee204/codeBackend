@@ -25,7 +25,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         String courseImagesPath = Paths.get("uploads", "imagescourse").toAbsolutePath().toUri().toString();
         registry.addResourceHandler("/images/courses/**")
                 .addResourceLocations(courseImagesPath);
-        
+        registry.addResourceHandler("/images/avatars/**")
+                .addResourceLocations(uploadPath + "avatars/");
+
         // Map cho video
         String videosPath = Paths.get("uploads", "videos").toAbsolutePath().toUri().toString();
         registry.addResourceHandler("/videos/**")

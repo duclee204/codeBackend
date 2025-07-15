@@ -34,90 +34,113 @@ public class UserRestController {
     @Autowired
     private FileStorageService fileStorageService;
 
-    // ✅ API đăng nhập
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
-        try {
-            boolean success = userService.login(userDTO);
-
-            if (!success) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                        "message", "Tên đăng nhập hoặc mật khẩu không đúng"
-                ));
-            }
-
-            User user = userMapper.findByUsername(userDTO.getUsername());
-            String token = jwtTokenUtil.generateToken(user);
-
-            return ResponseEntity.ok(Map.of(
-                    "message", "Đăng nhập thành công",
-                    "token", token
-            ));
-        } catch (RuntimeException e) {
-            // 🔒 Trường hợp tài khoản chưa xác minh
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                    "message", e.getMessage()
-            ));
-        }
-    }
-
-    // ✅ API đăng ký
-    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> register(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password,
-            @RequestParam("email") String email,
-            @RequestParam("fullName") String fullName,
-            @RequestParam("role") String role,
-            @RequestPart(value = "cv", required = false) MultipartFile cvFile
-    ) {
-        try {
-            String cvPath = null;
-            boolean isVerified;
-
-            if ("instructor".equalsIgnoreCase(role)) {
-                isVerified = false;
-
-                if (cvFile == null || cvFile.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("message", "CV file is required for instructors"));
+        // ✅ API đăng nhập
+        @PostMapping("/login")
+        public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+            try {
+                boolean success = userService.login(userDTO);
+                if (!success) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Tên đăng nhập hoặc mật khẩu không đúng"));
                 }
 
-                cvPath = fileStorageService.saveFile(cvFile, "cvs");
-            } else {
-                isVerified = true;
-            }
+                User user = userMapper.findByUsername(userDTO.getUsername());
+                String token = jwtTokenUtil.generateToken(user);
 
-            UserDTO userDTO = new UserDTO(username, password, email, fullName, role, isVerified, cvPath);
-            boolean created = userService.register(userDTO);
-
-            if (created) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("message", "User registered successfully");
-                if (cvPath != null) response.put("cvUrl", cvPath);
-                return ResponseEntity.ok(response);
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", "Registration failed"));
+                return ResponseEntity.ok(Map.of(
+                        "message", "Đăng nhập thành công",
+                        "token", token
+                ));
+            } catch (RuntimeException e) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", e.getMessage()));
             }
-
-        } catch (IllegalArgumentException e) {
-            String message = e.getMessage();
-            if ("Username already exists".equals(message)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Tên đăng nhập đã tồn tại"));
-            } else if ("Email already exists".equals(message)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Email đã được sử dụng"));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", message));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Internal server error"));
         }
-    }
 
+        // ✅ API đăng ký
+        @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<?> register(
+                @RequestParam String username,
+                @RequestParam String password,
+                @RequestParam String email,
+                @RequestParam String fullName,
+                @RequestParam(required = false) String role,
+                @RequestPart(value = "cv", required = false) MultipartFile cvFile,
+                @RequestPart(value = "avatar", required = false) MultipartFile avatarFile
+        ) {
+            try {
+                if (role == null || role.isBlank()) role = "student";
+                boolean isVerified = !"instructor".equalsIgnoreCase(role);
 
+                // CV xử lý riêng
+                String cvPath = null;
+                if ("instructor".equalsIgnoreCase(role)) {
+                    if (cvFile == null || cvFile.isEmpty()) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "CV file is required for instructors"));
+                    }
+                    cvPath = fileStorageService.saveFile(cvFile, "cvs");
+                }
 
+                // Avatar xử lý
+                String avatarPath = avatarFile != null && !avatarFile.isEmpty()
+                        ? fileStorageService.saveFile(avatarFile, "avatars")
+                        : "/uploads/avatars/default.png";
+
+                UserDTO dto = new UserDTO(username, password, email, fullName, role, isVerified, cvPath, avatarPath);
+
+                boolean created = userService.register(dto, avatarFile);
+                if (created) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "User registered successfully");
+                    if (cvPath != null) response.put("cvUrl", cvPath);
+                    return ResponseEntity.ok(response);
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("message", "Registration failed"));
+                }
+
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Internal server error"));
+            }
+        }
+
+        // ✅ API cập nhật người dùng (hỗ trợ avatar)
+        @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<?> updateUser(
+                @PathVariable Long id,
+                @RequestParam String username,
+                @RequestParam String email,
+                @RequestParam String fullName,
+                @RequestParam String role,
+                @RequestParam(required = false) String password,
+                @RequestParam(required = false) Boolean isVerified,
+                @RequestParam(required = false) String cvUrl,
+                @RequestPart(required = false) MultipartFile avatar
+        ) {
+            try {
+                String avatarUrl = null;
+                if (avatar != null && !avatar.isEmpty()) {
+                    avatarUrl = fileStorageService.saveFile(avatar, "avatars");
+                }
+
+                // Xử lý: nếu password rỗng hoặc null → bỏ qua
+                String safePassword = (password != null && !password.isBlank()) ? password : null;
+
+                UserDTO dto = new UserDTO(username, safePassword, email, fullName, role, isVerified, cvUrl, avatarUrl);
+                boolean updated = userService.updateUser(id, dto, avatar);
+
+                if (updated) {
+                    return ResponseEntity.ok(Map.of("message", "User updated successfully"));
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+                }
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Update failed: " + e.getMessage()));
+            }
+        }
+
+    // ✅ API danh sách người dùng
     // ✅ API lấy danh sách người dùng theo điều kiện
     @GetMapping("/list")
     @PreAuthorize("hasRole('admin')")
@@ -130,30 +153,18 @@ public class UserRestController {
         List<User> users = userService.getUsers(userId, role, isVerified, username);
         return ResponseEntity.ok(users);
     }
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(
-            @PathVariable Long id,
-            @RequestBody UserDTO userDTO
-    ) {
-        try {
-            boolean updated = userService.updateUser(id, userDTO);
-            if (updated) {
-                return ResponseEntity.ok("User updated successfully");
+
+
+    // ✅ API xóa người dùng
+        @DeleteMapping("/delete/{id}")
+        @PreAuthorize("hasRole('admin')")
+        public ResponseEntity<?> deleteUser(@PathVariable int id) {
+            boolean deleted = userService.deleteUser(id);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of("message", "Xóa người dùng thành công"));
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Người dùng không tồn tại"));
             }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Update failed: " + e.getMessage());
         }
+
     }
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<?> deleteUser(@PathVariable int id) {
-        boolean deleted = userService.deleteUser(id);
-        if (deleted) {
-            return ResponseEntity.ok("Xóa người dùng thành công");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
-        }
-    }
-}

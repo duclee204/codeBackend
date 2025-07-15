@@ -1,7 +1,6 @@
 package org.example.lmsbackend.dto;
 
 import java.sql.Timestamp;
-
 import jakarta.validation.constraints.*;
 
 public class UserDTO {
@@ -25,7 +24,8 @@ public class UserDTO {
     private String role;  // "student", "admin", "instructor"
 
     private Boolean isVerified;
-    private String cvUrl; // Only for instructor
+    private String cvUrl;       // Only for instructor
+    private String avatarUrl;   // Avatar image URL
 
     private String verificationToken;
     private Timestamp verifiedAt;
@@ -35,7 +35,7 @@ public class UserDTO {
     // ✅ Constructors
     public UserDTO() {}
 
-    public UserDTO(String username, String password, String email, String fullName, String role, Boolean isVerified, String cvUrl) {
+    public UserDTO(String username, String password, String email, String fullName, String role, Boolean isVerified, String cvUrl, String avatarUrl) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -43,6 +43,7 @@ public class UserDTO {
         this.role = role;
         this.isVerified = isVerified;
         this.cvUrl = cvUrl;
+        this.avatarUrl = avatarUrl;
     }
 
     // ✅ Getters and Setters
@@ -69,6 +70,9 @@ public class UserDTO {
 
     public String getCvUrl() { return cvUrl; }
     public void setCvUrl(String cvUrl) { this.cvUrl = cvUrl; }
+
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 
     public String getVerificationToken() { return verificationToken; }
     public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
