@@ -43,6 +43,19 @@ public class ContentsService {
         return modulesMapper.getCourseIdByModuleId(moduleId);
     }
 
+    public Integer getCourseIdByContentId(Integer contentId) {
+        try {
+            System.out.println("🔍 Getting courseId for contentId: " + contentId);
+            Integer courseId = contentsMapper.getCourseIdByContentId(contentId);
+            System.out.println("🔍 Found courseId: " + courseId);
+            return courseId;
+        } catch (Exception e) {
+            System.err.println("❌ Error getting courseId for contentId " + contentId + ": " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     // ✅ Thêm phương thức này để lưu file PDF
 //    public String saveFile(MultipartFile file) {
 //        String uploadDir = "uploads/";

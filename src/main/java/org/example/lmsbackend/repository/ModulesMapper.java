@@ -12,7 +12,8 @@ public interface ModulesMapper {
     // Thêm module
     @Insert("INSERT INTO modules (course_id, title, description, order_number) " +
             "VALUES (#{courseId}, #{title}, #{description}, #{orderNumber})")
-    void insertModule(ModulesDTO module);  // ✅ Đổi từ ModuleRequest → ContentsDTO
+    @Options(useGeneratedKeys = true, keyProperty = "moduleId")
+    int insertModule(ModulesDTO module);
     // Lấy danh sách modules theo courseId
     @Select("SELECT module_id AS moduleId, course_id AS courseId, title, description, order_number AS orderNumber " +
             "FROM modules WHERE course_id = #{courseId} ORDER BY order_number")
@@ -21,11 +22,11 @@ public interface ModulesMapper {
     // Cập nhật module
     @Update("UPDATE modules SET title = #{title}, description = #{description}, order_number = #{orderNumber} " +
             "WHERE module_id = #{moduleId}")
-    void updateModule(ModulesDTO module);
+    int updateModule(ModulesDTO module);
 
     // Xóa module theo ID
     @Delete("DELETE FROM modules WHERE module_id = #{moduleId}")
-    void deleteModule(@Param("moduleId") int moduleId);
+    int deleteModule(@Param("moduleId") int moduleId);
     @Select("SELECT course_id FROM modules WHERE module_id = #{moduleId}")
     int getCourseIdByModuleId(@Param("moduleId") int moduleId);
 }

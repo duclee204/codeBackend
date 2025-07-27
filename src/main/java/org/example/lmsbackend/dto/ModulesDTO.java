@@ -7,6 +7,18 @@ public class ModulesDTO {
     private String description;
     private int orderNumber;
 
+    // Override toString for better logging
+    @Override
+    public String toString() {
+        return "ModulesDTO{" +
+                "moduleId=" + moduleId +
+                ", courseId=" + courseId +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", orderNumber=" + orderNumber +
+                '}';
+    }
+
     // Getters and Setters
     public int getModuleId() {
         return moduleId;

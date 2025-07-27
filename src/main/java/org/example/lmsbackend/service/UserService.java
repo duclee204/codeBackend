@@ -65,7 +65,12 @@ public class UserService {
         user.setFullName(userDTO.getFullName());
 
         try {
-            User.Role role = User.Role.valueOf(userDTO.getRole().toLowerCase());
+            // ✅ Xử lý role: loại bỏ prefix "ROLE_" nếu có
+            String roleString = userDTO.getRole();
+            if (roleString.startsWith("ROLE_")) {
+                roleString = roleString.substring(5); // Loại bỏ "ROLE_"
+            }
+            User.Role role = User.Role.valueOf(roleString.toLowerCase());
             user.setRole(role);
 
             if (role == User.Role.instructor) {
@@ -86,7 +91,7 @@ public class UserService {
         if (avatarFile != null && !avatarFile.isEmpty()) {
             user.setAvatarUrl(saveAvatar(avatarFile));
         } else {
-            user.setAvatarUrl("/uploads/avatars/default.png");
+            user.setAvatarUrl("/images/avatars/default.png");
         }
 
         try {
@@ -109,7 +114,12 @@ public class UserService {
         existingUser.setFullName(userDTO.getFullName());
 
         try {
-            existingUser.setRole(User.Role.valueOf(userDTO.getRole().toLowerCase()));
+            // ✅ Xử lý role: loại bỏ prefix "ROLE_" nếu có
+            String roleString = userDTO.getRole();
+            if (roleString.startsWith("ROLE_")) {
+                roleString = roleString.substring(5); // Loại bỏ "ROLE_"
+            }
+            existingUser.setRole(User.Role.valueOf(roleString.toLowerCase()));
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid role: " + userDTO.getRole());
         }
@@ -144,13 +154,14 @@ public class UserService {
             Files.createDirectories(uploadPath);
 
             String originalFilename = file.getOriginalFilename();
-            String cleanedFilename = originalFilename != null ? originalFilename.replaceAll("\\s+", "_") : "avatar.png";
+            String cleanedFilename = originalFilename != null ? 
+                originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_") : "avatar.png";
             String filename = UUID.randomUUID() + "_" + cleanedFilename;
 
             Path filePath = uploadPath.resolve(filename);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            return "/uploads/avatars/" + filename;
+            return "/images/avatars/" + filename;
         } catch (IOException e) {
             throw new RuntimeException("Lỗi khi lưu file avatar", e);
         }

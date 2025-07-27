@@ -14,8 +14,9 @@ public class ModulesService {
     private ModulesMapper modulesMapper;
 
     // Thêm module — dùng ContentsDTO thay vì ModuleRequest
-    public void createModule(ModulesDTO module) {
-        modulesMapper.insertModule(module);
+    public boolean createModule(ModulesDTO module) {
+        int result = modulesMapper.insertModule(module);
+        return result > 0;
     }
 
     // Lấy danh sách modules theo courseId
@@ -24,13 +25,15 @@ public class ModulesService {
     }
 
     // Cập nhật module
-    public void updateModule(ModulesDTO module) {
-        modulesMapper.updateModule(module);
+    public boolean updateModule(ModulesDTO module) {
+        int result = modulesMapper.updateModule(module);
+        return result > 0;
     }
 
     // Xóa module
-    public void deleteModule(int moduleId) {
-        modulesMapper.deleteModule(moduleId);
+    public boolean deleteModule(int moduleId) {
+        int result = modulesMapper.deleteModule(moduleId);
+        return result > 0;
     }
     public int getCourseIdByModuleId(int moduleId) {
         return modulesMapper.getCourseIdByModuleId(moduleId);

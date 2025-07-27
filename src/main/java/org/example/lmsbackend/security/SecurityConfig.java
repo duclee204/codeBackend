@@ -32,9 +32,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/courses/list").hasAnyRole("admin", "instructor")
                         .requestMatchers("/api/enrollments/**").hasAnyRole("admin", "instructor", "student")
                         .requestMatchers("/api/contents").hasAnyRole("admin", "instructor")
+                        .requestMatchers("/api/assignments/**").hasAnyRole("admin", "instructor", "student")
+                        .requestMatchers("/api/assignment-submissions/**").hasAnyRole("admin", "instructor", "student")
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/api/users/delete/**").hasRole("admin")
                         .requestMatchers("/uploads/avatars/**").permitAll() // ✅ Cho phép ảnh avatar
+                        .requestMatchers("/uploads/assignments/**").permitAll() // ✅ Cho phép file bài tập
                         .requestMatchers("/cvs/**").permitAll() // ✅ Cho phép truy cập file CV công khai
                         .anyRequest().authenticated()
                 )

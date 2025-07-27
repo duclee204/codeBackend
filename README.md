@@ -4,6 +4,8 @@
 - Quản lý khóa học (Course Management)
 - Học video (Video Learning)
 - Tham gia khóa học (Course Enrollment)
+- Quản lý bài tập (Assignment Management)
+- Nộp bài tập (Assignment Submission)
 
 ### 1.1. Mục tiêu kiểm thử
 - Đảm bảo các chức năng trên hoạt động đúng theo yêu cầu nghiệp vụ.
@@ -31,5 +33,15 @@
 | TC08 | Kiểm tra tiến độ học tập      | 1. Đăng nhập user\n2. Vào trang tiến độ học tập                                | ID user                    | Hiển thị đúng tiến độ các khóa học đã tham gia     |
 | TC09 | Đăng xuất                     | 1. Đăng nhập\n2. Nhấn "Đăng xuất"                                             | -                          | Người dùng đăng xuất thành công                    |
 | TC10 | Đăng nhập sai thông tin       | 1. Nhập sai tài khoản/mật khẩu\n2. Nhấn "Đăng nhập"                            | Tài khoản/mật khẩu sai     | Hiển thị thông báo lỗi đăng nhập                   |
+| TC11 | Tạo bài tập mới               | 1. Đăng nhập instructor\n2. Vào khóa học\n3. Chọn nội dung\n4. Tạo bài tập\n5. Nhập thông tin\n6. Lưu | Thông tin bài tập mới      | Bài tập được tạo thành công                       |
+| TC12 | Sửa thông tin bài tập         | 1. Đăng nhập instructor\n2. Chọn bài tập\n3. Nhấn "Sửa"\n4. Thay đổi thông tin\n5. Lưu | Thông tin sửa đổi          | Thông tin bài tập được cập nhật                   |
+| TC13 | Xóa bài tập                   | 1. Đăng nhập instructor\n2. Chọn bài tập\n3. Nhấn "Xóa"\n4. Xác nhận          | ID bài tập                 | Bài tập bị xóa khỏi hệ thống                      |
+| TC14 | Nộp bài tập                   | 1. Đăng nhập student\n2. Vào bài tập\n3. Nhập nội dung\n4. Upload file\n5. Nộp bài | Nội dung bài làm + file    | Bài tập được nộp thành công                       |
+| TC15 | Chấm điểm bài tập             | 1. Đăng nhập instructor\n2. Xem bài nộp\n3. Nhập điểm\n4. Nhập feedback\n5. Lưu | Điểm số + feedback         | Bài tập được chấm điểm thành công                 |
+| TC16 | Xem danh sách bài nộp         | 1. Đăng nhập instructor\n2. Vào bài tập\n3. Xem danh sách bài nộp             | ID bài tập                 | Hiển thị đúng danh sách bài nộp của học viên      |
+| TC17 | Xem bài tập đã nộp (student)  | 1. Đăng nhập student\n2. Vào trang bài tập của tôi                            | ID student                 | Hiển thị đúng danh sách bài tập đã nộp            |
+| TC18 | Nộp bài trùng lặp             | 1. Đăng nhập student\n2. Nộp bài tập\n3. Thử nộp lại bài tập đó               | Bài tập đã nộp             | Hiển thị thông báo lỗi không được nộp lại         |
+| TC19 | Nộp bài sau deadline          | 1. Đăng nhập student\n2. Thử nộp bài tập đã quá hạn                           | Bài tập quá hạn            | Hiển thị thông báo không được nộp sau deadline    |
+| TC20 | Xem feedback của bài tập      | 1. Đăng nhập student\n2. Vào bài tập đã được chấm điểm                        | ID bài tập đã chấm         | Hiển thị điểm số và feedback từ giảng viên        |
 
 > (Có thể bổ sung thêm test case tùy thực tế)

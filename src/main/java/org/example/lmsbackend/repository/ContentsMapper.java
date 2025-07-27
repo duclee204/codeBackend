@@ -43,5 +43,8 @@ public interface ContentsMapper {
     // ✅ Thêm để hỗ trợ kiểm tra quyền instructor khi update/delete
     @Select("SELECT module_id FROM contents WHERE content_id = #{contentId}")
     Integer getModuleIdByContentId(@Param("contentId") int contentId);
+
+    @Select("SELECT course_id FROM contents WHERE content_id = #{contentId}")
+    Integer getCourseIdByContentId(@Param("contentId") Integer contentId);
 }
 

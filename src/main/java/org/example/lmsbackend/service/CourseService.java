@@ -23,8 +23,13 @@ public class CourseService {
 
     @Autowired
     private QuizzesService quizzesService;
+    
     @Autowired
     private CourseMapper courseMapper;
+    
+    @Autowired
+    private AssignmentService assignmentService;
+    
     public boolean createCourse(CourseDTO dto, MultipartFile imageFile) {
         try {
             Course course = new Course();
@@ -100,6 +105,17 @@ public class CourseService {
 
         return isInstructorOfCourse(instructorId, courseId);
     }
+    
+    public boolean isInstructorOwnerOfAssignment(Integer instructorId, Integer assignmentId) {
+        org.example.lmsbackend.model.Assignment assignment = assignmentService.getAssignmentById(assignmentId);
+        if (assignment == null) return false;
+        
+        Integer courseId = contentsService.getCourseIdByContentId(assignment.getContentId());
+        if (courseId == null) return false;
+        
+        return isInstructorOfCourse(instructorId, courseId);
+    }
+    
     private String saveImage(MultipartFile file) {
         try {
             String uploadDir = "uploads/imagescourse";

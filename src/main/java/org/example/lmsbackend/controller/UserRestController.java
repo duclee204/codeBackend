@@ -6,15 +6,16 @@ import org.example.lmsbackend.service.FileStorageService;
 import org.example.lmsbackend.service.UserService;
 import org.example.lmsbackend.utils.JwtTokenUtil;
 import org.example.lmsbackend.repository.UserMapper;
+import org.example.lmsbackend.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class UserRestController {
                 // Avatar xử lý
                 String avatarPath = avatarFile != null && !avatarFile.isEmpty()
                         ? fileStorageService.saveFile(avatarFile, "avatars")
-                        : "/uploads/avatars/default.png";
+                        : "/images/avatars/default.png";
 
                 UserDTO dto = new UserDTO(username, password, email, fullName, role, isVerified, cvPath, avatarPath);
 
@@ -152,6 +153,21 @@ public class UserRestController {
 
         List<User> users = userService.getUsers(userId, role, isVerified, username);
         return ResponseEntity.ok(users);
+    }
+
+    // ✅ API lấy thông tin profile user hiện tại
+    @GetMapping("/profile")
+    public ResponseEntity<?> getCurrentUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userService.getUserById(Long.valueOf(userDetails.getUserId()));
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error retrieving profile"));
+        }
     }
 
 
